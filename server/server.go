@@ -21,16 +21,14 @@ func main() {
 	commandChannel := make(chan command)
 	go handleCommands(l, commandChannel)
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Missile Launcher")
-	})
+	http.Handle("/", http.FileServer(http.Dir(".")))
 
 	http.HandleFunc("/launcher/", func(w http.ResponseWriter, r *http.Request) {
 		const prefixLen = len("/launcher/")
 		commandName := r.URL.Path[prefixLen:]
 		fmt.Fprintf(w, "Missile Launcher: %s", html.EscapeString(commandName))
 		log.Println(commandName)
-		const turnDuration = 250
+		const turnDuration = 150
 		var cmd command
 		switch commandName {
 		case "left":
@@ -42,7 +40,7 @@ func main() {
 		case "down":
 			cmd = command{launcher.Down, turnDuration}
 		case "fire":
-			cmd = command{launcher.Fire, 3000}
+			cmd = command{launcher.Fire, 0}
 		}
 		commandChannel <- cmd
 	})
@@ -55,7 +53,9 @@ func handleCommands(l *launcher.Launcher, commandChannel chan command) {
 	for {
 		cmd := <-commandChannel
 		l.SendCommand(cmd.command)
-		time.Sleep(time.Duration(cmd.durationMillis * int64(time.Millisecond)))
-		l.SendCommand(launcher.Stop)
+		if (cmd.durationMillis != 0) {
+			time.Sleep(time.Duration(cmd.durationMillis * int64(time.Millisecond)))
+			l.SendCommand(launcher.Stop)
+		}
 	}
 }
