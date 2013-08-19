@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/ddunkin/launcher"
 	"html"
@@ -45,8 +46,11 @@ func main() {
 		commandChannel <- cmd
 	})
 
-	log.Println("Listening")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := flag.Uint("p", 8888, "Port to listen on")
+	flag.Parse()
+
+	log.Printf("Listening on port %d", *port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
 }
 
 func handleCommands(l *launcher.Launcher, commandChannel chan command) {
