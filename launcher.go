@@ -27,6 +27,22 @@ func Create() *Launcher {
 		return nil
 	}
 
+	const ifc = 0
+	r, driver := dev.Driver(ifc)
+	if r == 0 {
+		log.Printf("Claimed by %s\n", driver)
+		if dev.Detach(ifc) != 0 {
+			log.Println("Cannot detach")
+			return nil
+		}
+	}
+
+	claimed := dev.Interface(ifc)
+	if claimed != 0 {
+		log.Println("Cannot claim device")
+		return nil
+	}
+
 	launcher := new(Launcher)
 	launcher.device = dev
 	return launcher
