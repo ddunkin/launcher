@@ -2,6 +2,7 @@ package launcher
 
 import (
 	"log"
+	"time"
 	"github.com/ddunkin/go-libusb"
 )
 
@@ -60,3 +61,10 @@ func (launcher *Launcher) SendCommand(command byte) {
 	launcher.device.ControlMsg(0x21, 0x09, 0x0200, 0, msg[:])
 }
 
+func (launcher *Launcher) SendCommandDuration(command byte, durationMillis int64) {
+	launcher.SendCommand(command)
+	if durationMillis != 0 {
+		time.Sleep(time.Duration(durationMillis * int64(time.Millisecond)))
+		launcher.SendCommand(Stop)
+	}
+}

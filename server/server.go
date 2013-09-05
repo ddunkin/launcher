@@ -7,7 +7,6 @@ import (
 	"html"
 	"log"
 	"net/http"
-	"time"
 )
 
 type command struct {
@@ -56,10 +55,6 @@ func main() {
 func handleCommands(l *launcher.Launcher, commandChannel chan command) {
 	for {
 		cmd := <-commandChannel
-		l.SendCommand(cmd.command)
-		if (cmd.durationMillis != 0) {
-			time.Sleep(time.Duration(cmd.durationMillis * int64(time.Millisecond)))
-			l.SendCommand(launcher.Stop)
-		}
+		l.SendCommandDuration(cmd.command, cmd.durationMillis)
 	}
 }
